@@ -1,146 +1,105 @@
-API_REST_DJANGO
+# Dashboard de Postura de Segurança (CISO)
 
-Projeto de treinamento em Django com API REST, contendo importação de banco de dados.
+Este projeto consiste em uma API REST desenvolvida com Django Rest Framework (DRF) que alimenta um dashboard visual para monitoramento de indicadores de segurança (KPIs). O sistema processa dados históricos de ambientes On-Premise e Azure, permitindo a visualização da evolução de riscos, compliance de senhas e higiene do Active Directory.
 
-Conteúdo
+## Funcionalidades Principais
 
-core/ — app principal do Django
+- **API RESTful:** Endpoints para consulta de métricas de segurança.
+- **Importação de Dados:** Script automatizado para ingestão de dados via arquivos CSV.
+- **Dashboard Interativo:** Frontend desacoplado utilizando Chart.js para renderização de gráficos.
+- **Documentação Automática:** Swagger/OpenAPI integrado via drf-spectacular.
+- **Métricas Monitoradas:**
+    - Sistemas Operacionais de Risco.
+    - Contas de Administrador (Privileged Access).
+    - Higiene de Contas (Usuários Obsoletos/Stale).
+    - Conformidade de Senhas.
+    - Bloqueios de Conta (Lockouts).
 
-dashboard_seguranca/ — app específico para dashboard ou segurança (conforme nome)
+## Tecnologias Utilizadas
 
-ANTT - 14d01.csv — arquivo CSV de dados utilizados
+- **Backend:** Python 3, Django 5, Django Rest Framework.
+- **Documentação:** drf-spectacular (OpenAPI 3.0).
+- **Frontend:** HTML5, CSS3, Chart.js (consumindo JSON da API).
+- **Banco de Dados:** SQLite (padrão) ou compatível com Django ORM.
 
-db.sqlite3 — banco de dados SQLite usado no projeto
+## Pré-requisitos
 
-manage.py — script de gerenciamento do Django
+Certifique-se de ter o Python instalado em sua máquina.
 
-Funcionalidades
+## Instalação e Configuração
 
-Interface de API REST construída com Django / Django REST Framework (assumido por se tratar de API REST).
+1. Clone o repositório:
+```bash
+git clone [https://github.com/seu-usuario/dashboard-seguranca.git](https://github.com/seu-usuario/dashboard-seguranca.git)
+cd dashboard-seguranca
+Crie e ative o ambiente virtual:
 
-Importação de dados a partir de um arquivo CSV (ANTT - 14d01.csv) para a base de dados.
+Bash
 
-Estrutura de dashboards (ou componentes de segurança) no Django para visualização/monitoramento (presumido pelo nome do app dashboard_seguranca).
+# Windows
+python -m venv venv
+.\venv\Scripts\activate
 
-Tecnologias
-
-Python
-
-Django
-
-Django REST Framework
-
-SQLite como banco de dados local
-
-Pré-requisitos
-
-Antes de rodar o projeto, você precisa:
-
-Ter Python instalado (versão compatível com o projeto)
-
-Ter pip para instalar dependências
-
-(Opcional) criar um ambiente virtual (venv ou similar)
-
-Instalação / Setup local
-
-Clone o repositório:
-
-git clone https://github.com/Diego-deBrito/API_REST_DJANGO.git
-cd API_REST_DJANGO
-
-
-Crie e ative um ambiente virtual:
-
+# Linux/Mac
 python3 -m venv venv
-source venv/bin/activate     # Linux / macOS  
-venv\Scripts\activate        # Windows
+source venv/bin/activate
+Instale as dependências:
 
+Bash
 
-Instale as dependências (caso tenha um requirements.txt, senão instale manualmente Django e DRF):
+pip install django djangorestframework django-filter drf-spectacular
+Execute as migrações do banco de dados:
 
-pip install django djangorestframework
+Bash
 
-
-Aplique as migrações para configurar o banco de dados:
-
+python manage.py makemigrations
 python manage.py migrate
+Importação de Dados
+O projeto possui um comando personalizado para carregar os dados da planilha ANTT - 14d01.csv.
 
+Coloque o arquivo .csv na raiz do projeto (mesma pasta do manage.py).
 
-(Opcional) Importe dados do CSV para o banco de dados:
+Execute o comando de importação:
 
-Dependendo da implementação do projeto, pode haver um comando customizado ou uma rotina para isso. Se existir, por exemplo:
+Bash
 
-python manage.py import_csv "ANTT - 14d01.csv"
+python manage.py importar_csv
+Caso precise limpar o banco antes de importar novos dados:
 
+Bash
 
-Se não houver, você pode abrir o Django shell e fazer a importação manualmente ou por script.
+python manage.py flush
+Executando o Projeto
+Inicie o servidor de desenvolvimento:
 
-Executando a aplicação
-
-Para rodar o servidor de desenvolvimento:
+Bash
 
 python manage.py runserver
+Acesse os seguintes endereços no navegador:
 
+Dashboard Visual: https://www.google.com/search?q=http://127.0.0.1:8000/
 
-Depois, você pode acessar:
+API Root: https://www.google.com/search?q=http://127.0.0.1:8000/api/metricas/
 
-A API REST via rotas definidas (ex: http://localhost:8000/api/...)
+Documentação Swagger: https://www.google.com/search?q=http://127.0.0.1:8000/api/docs/
 
-O painel administrativo do Django (se configurado) em http://localhost:8000/admin/
+Endpoints da API
+Métricas de Segurança
+GET /api/metricas/: Lista todo o histórico de métricas.
 
-Estrutura de Rotas da API
+GET /api/metricas/?dominio=antt.gov.br: Filtra métricas por domínio.
 
-Explique aqui os endpoints principais da sua API (exemplos):
+Dados do Dashboard
+GET /api/metricas/dashboard_data/: Retorna um JSON estruturado especificamente para alimentar os gráficos do frontend, contendo séries temporais separadas por categorias (risco, gestão, kpis).
 
-GET /api/entidade/ — lista todos os registros
+Estrutura do Projeto
+core/models.py: Definição da estrutura do banco de dados para os KPIs.
 
-POST /api/entidade/ — cria um novo registro
+core/views.py: Lógica da API e tratamento dos dados para o dashboard.
 
-PUT /api/entidade/{id}/ — atualiza um registro por ID
+core/management/commands/importar_csv.py: Script ETL para leitura do CSV.
 
-DELETE /api/entidade/{id}/ — deleta um registro por ID
-
-Nota: ajuste esta seção conforme os endpoints reais do seu projeto (controllers, viewsets, serializers).
-
-Uso
-
-Algumas ideias de uso para esse projeto:
-
-Experimento / protótipo de API REST com Django
-
-Treinamento para importar dados CSV para um banco de dados via Django
-
-Base para construir dashboards ou relatórios usando dados importados
-
-Como contribuir
-
-Se alguém quiser colaborar no projeto:
-
-Faça um fork do repositório
-
-Crie uma branch nova para sua feature ou correção
-
-Faça os commits com mensagens claras
-
-Abra um pull request explicando as mudanças
+templates/index.html: Interface do dashboard com Chart.js.
 
 Licença
-
-Defina a licença do seu projeto aqui (por exemplo, MIT, GPL, etc.). Se você não tiver definido ainda, pode adicionar algo como:
-
-MIT License
-
-Próximos passos / melhorias sugeridas
-
-Algumas ideias para evoluir este projeto:
-
-Adicionar testes automatizados (unitários e de integração) para a API
-
-Implementar autenticação / autorização para a API (DRF)
-
-Subir para um banco de produção (PostgreSQL, por exemplo)
-
-Criar uma interface frontend para o dashboard de segurança
-
-Automatizar a importação de CSV via script ou comando de management
+Este projeto é destinado a fins de estudo e monitoramento interno.
