@@ -1,0 +1,36 @@
+# --- Python Geral ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Ambientes Virtuais (Essencial!) ---
+# Ignora pastas de ambiente virtual comuns
+env/
+venv/
+.venv/
+myenv/
+
+# --- Django ---
+# Ignora o banco de dados local (geralmente não queremos versionar o banco de teste)
+db.sqlite3
+db.sqlite3-journal
+
+# Se houver pasta de arquivos estáticos coletados
+staticfiles/
+
+# Uploads de usuários (mídia)
+media/
+
+# --- Arquivos de Configuração Sensíveis ---
+# NUNCA suba arquivos com senhas ou chaves secretas
+.env
+.env.local
+
+# --- IDEs / Editores de Texto ---
+# Arquivos de configuração do VS Code ou Pycharm
+.vscode/
+.idea/
+
+# --- Logs ---
+*.log
