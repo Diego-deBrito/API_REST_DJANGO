@@ -54,8 +54,11 @@ class Command(BaseCommand):
                         sistemas_risco=limpar(row.get('No of Computer Accounts with a Risky Operating System')),
                         usuarios_bloqueados=limpar(row.get('No of Enabled Locked-out Users')),
                         grupos_vazios=limpar(row.get('No of Empty Groups')),
-                        usuarios_azure=limpar(row.get('No of Azure AD Cloud users'))
-                    )
+                        usuarios_azure=limpar(row.get('No of Azure AD Cloud users')),
+                        contas_admin=limpar(row.get('No of Admin Accounts')),
+                        senhas_nao_expiram=limpar(row.get('No of Enabled Accounts with Passwords That Do Not Expire')),
+                        usuarios_obsoletos=limpar(row.get('No of Enabled but Stale Users'))
+                )
                     contador += 1
                     
                 except Exception as e:

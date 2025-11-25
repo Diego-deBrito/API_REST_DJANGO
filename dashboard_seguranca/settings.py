@@ -43,9 +43,12 @@ INSTALLED_APPS = [
     'rest_framework', # motor da API
     'django_filters', # para permitir o dominio dos filtros na API
     'core', # nossa app principal
+    'corsheaders', # para permitir requisições cross-origin
+    'drf_spectacular', # para documentação automática da API
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -55,7 +58,26 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+#  Configure o REST_FRAMEWORK
+REST_FRAMEWORK = {
+    # Diga ao DRF para usar o schema do spectacular
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+# 3. Configurações visuais do Swagger
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Dashboard de Segurança (CISO)',
+    'DESCRIPTION': 'API para monitoramento de riscos On-Premise e Azure',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # Outras opções visuais (opcional)
+    'COMPONENT_SPLIT_REQUEST': True
+}
+
 ROOT_URLCONF = 'dashboard_seguranca.urls'
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 TEMPLATES = [
     {

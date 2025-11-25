@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard de Segurança</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
+        
+        /* Cabeçalho */
+        .header { margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { margin: 0; font-size: 1.8rem; color: #2c3e50; }
+        .badge { background: #34495e; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; }
+
+        /* Grid de KPIs */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid #ddd; }
+        .kpi-value { font-size: 2.2rem; font-weight: bold; margin: 10px 0; color: #2c3e50; }
+        .kpi-label { font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Grid de Gráficos */
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .chart-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .full-width { grid-column: 1 / -1; } /* Ocupa a largura toda */
+        
+        h3 { margin-top: 0; color: #34495e; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🛡️ Painel de Postura de Segurança</h1>
+        <span class="badge">ANTT / Azure</span>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-card" style="border-color: #e74c3c;">
+            <div class="kpi-label">Sistemas em Risco</div>
+            <div class="kpi-value" id="kpi-risco">--</div>
+        </div>
+        <div class="kpi-card" style="border-color: #f39c12;">
+            <div class="kpi-label">Usuários Stale</div>
+            <div class="kpi-value" id="kpi-stale">--</div>
+        </div>
+        <div class="kpi-card" style="border-color: #3498db;">
+            <div class="kpi-label">Admins Totais</div>
+            <div class="kpi-value" id="kpi-admin">--</div>
+        </div>
+        <div class="kpi-card" style="border-color: #9b59b6;">
+            <div class="kpi-label">Usuários Azure</div>
+            <div class="kpi-value" id="kpi-azure">--</div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        
+        <div class="chart-box full-width">
+            <h3>📉 Tendência de Riscos Críticos</h3>
+            <div style="height: 300px;">
+                <canvas id="chartRisco"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-box">
+            <h3>🔑 Compliance de Acesso (Admins vs Senhas Eternas)</h3>
+            <div style="height: 250px;">
+                <canvas id="chartCompliance"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-box">
+            <h3>🧹 Higiene do AD (Obsoletos e Vazios)</h3>
+            <div style="height: 250px;">
+                <canvas id="chartHigiene"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        async function carregarDashboard() {
+            try {
+                // 1. Busca os dados
+                const response = await fetch('http://127.0.0.1:8000/api/metricas/dashboard_data/');
+                if (!response.ok) throw new Error("Erro na API");
+                const dados = await response.json();
+                console.log("Dados recebidos:", dados);
+
+                // 2. Preenche KPIs
+                document.getElementById('kpi-risco').innerText = dados.kpis.total_risco;
+                document.getElementById('kpi-stale').innerText = dados.kpis.total_stale;
+                document.getElementById('kpi-admin').innerText = dados.kpis.total_admins;
+                document.getElementById('kpi-azure').innerText = dados.kpis.total_azure;
+
+                // 3. Gráfico de Risco (Linha + Barra)
+                new Chart(document.getElementById('chartRisco'), {
+                    type: 'line',
+                    data: {
+                        labels: dados.labels,
+                        datasets: [
+                            {
+                                label: 'Sistemas Operacionais de Risco',
+                                data: dados.riscos.os_antigo,
+                                borderColor: '#e74c3c', // Vermelho
+                                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                                fill: true,
+                                tension: 0.4,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'Usuários Bloqueados',
+                                type: 'bar',
+                                data: dados.riscos.bloqueados,
+                                backgroundColor: '#f39c12', // Laranja
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        scales: {
+                            y: { position: 'left', title: {display: true, text: 'Qtd Sistemas'} },
+                            y1: { position: 'right', grid: {drawOnChartArea: false} }
+                        }
+                    }
+                });
+
+                // 4. Gráfico Compliance (Comparativo)
+                new Chart(document.getElementById('chartCompliance'), {
+                    type: 'line',
+                    data: {
+                        labels: dados.labels,
+                        datasets: [
+                            {
+                                label: 'Senhas que nunca expiram',
+                                data: dados.riscos.compliance_senhas,
+                                borderColor: '#8e44ad', // Roxo
+                                borderDash: [5, 5],
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Contas Admin',
+                                data: dados.gestao.admins,
+                                borderColor: '#3498db', // Azul
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+                // 5. Gráfico Higiene (Barra)
+                new Chart(document.getElementById('chartHigiene'), {
+                    type: 'bar',
+                    data: {
+                        labels: dados.labels,
+                        datasets: [
+                            {
+                                label: 'Usuários Stale (Obsoletos)',
+                                data: dados.gestao.usuarios_stale,
+                                backgroundColor: '#95a5a6' // Cinza
+                            },
+                            {
+                                label: 'Grupos Vazios',
+                                data: dados.gestao.grupos_vazios,
+                                backgroundColor: '#1abc9c' // Verde água
+                            }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+            } catch (erro) {
+                console.error(erro);
+                alert("Erro ao carregar dados. Verifique se o servidor Django está rodando e se os dados foram importados.");
+            }
+        }
+
+        carregarDashboard();
+    </script>
+</body>
+</html>
